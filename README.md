@@ -27,6 +27,9 @@ HiDream-O1-Image is a natively unified image generative foundation model built o
 - 🎨 **One Model, Many Tasks** — Text-to-image, long-text rendering, instruction editing, subject-driven personalization, and storyboard generation in a single architecture.
 - 🧠 **Reasoning-Driven Prompt Agent** — Built-in "thinking" agent that resolves implicit knowledge, layout, and text rendering before generation.
 - 🖼️ **Native High Resolution** — Direct synthesis up to 2,048 × 2,048 with sharp fine-grained detail.
+- ⚡ **Exceptional Efficiency and Versatility at 8B Scale** — With only 8B parameters, achieves performance parity with or even surpasses larger open-source DiTs and leading closed-source models.
+
+
 
 ## Models
 
