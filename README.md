@@ -3,7 +3,7 @@
 HiDream-O1-Image is a natively unified image generative foundation model built on a Pixel-level Unified Transformer (UiT) without external VAEs or disjoint text encoders, which natively encodes raw pixels, text, and task-specific conditions in a single shared token space — supporting text-to-image, image editing, and subject-driven personalization at up to 2,048 × 2,048.
 
 ## Project Updates
-
+- 🛠️ **May 13, 2026:** Inference & pipeline updates — accelerated IP inference; the IP pipeline now supports **layout** and **skeleton** conditioning; updated the Dev editing scheduler. For editing tasks we recommend using the **full** model. PyTorch 2.9.x is not recommended due to the [issue](https://github.com/QwenLM/Qwen3-VL/issues/1811)
 - 🤗 **May 10, 2026:** Try **HiDream-O1-Image** online on Hugging Face Spaces — [🤗 HiDream-O1-Image](https://huggingface.co/spaces/HiDream-ai/HiDream-O1-Image) and [🤗 HiDream-O1-Image-Dev](https://huggingface.co/spaces/HiDream-ai/HiDream-O1-Image-Dev).
 - 📕 **May 10, 2026:** Our **technical report** is now available — [📑 HiDream-O1-Image.pdf](assets/HiDream-O1-Image.pdf).
 - 🚀 **May 8, 2026:** We've open-sourced **HiDream-O1-Image (8B)**, including both the undistilled and distilled Dev variants, together with the Reasoning-Driven Prompt Agent.
@@ -29,7 +29,7 @@ HiDream-O1-Image is a natively unified image generative foundation model built o
 </p>
 
 <p align="center">
-  <img src="assets/IP.webp" alt="Subject-driven personalization" width="100%"/>
+  <img src="assets/IP_2.webp" alt="Subject-driven personalization" width="100%"/>
   <br><sub><b>Subject-driven personalization</b> — preserve identity / IP across new scenes.</sub>
 </p>
 
@@ -257,9 +257,33 @@ Provide two or more reference images that define the subject(s), and a prompt th
 ```bash
 python inference.py \
     --model_path /path/to/HiDream-O1-Image \
+    --shift 1 \
     --prompt "A young boy with blonde hair stands on steps wearing light blue jeans, a white t-shirt with logo, and blue and white sneakers. He wears a brown cord necklace with beads, a black wristwatch with digital display, and carries a yellow fanny pack with white zipper. In his hand is a red boxing glove with white top, a teal plastic toy car, and a plastic toy figure of Captain America. He wears a straw hat with cream band. Natural light illuminates the scene." \
     --ref_images assets/IP/1.jpg assets/IP/2.jpg assets/IP/3.jpg assets/IP/4.jpg assets/IP/5.jpg assets/IP/6.jpg assets/IP/7.jpg assets/IP/8.jpg assets/IP/9.jpg assets/IP/10.jpg \
     --output_image results/subject.png
+```
+
+### 4. Multi-Reference Subject-Driven Personalization with Skeleton
+```bash
+python inference.py \
+    --model_path /path/to/HiDream-O1-Image \
+    --shift 1 \
+    --seed 42 \
+    --prompt "Create a realistic try-on image of the person wearing the provided clothing." \
+    --ref_images assets/IP_skeleton/0.face.jpg assets/IP_skeleton/0.bg.jpg assets/IP_skeleton/0.openpose.jpg assets/IP_skeleton/0.part_1.jpg assets/IP_skeleton/0.part_2.jpg assets/IP_skeleton/0.part_3.jpg  \
+    --output_image results/subject.png
+```
+
+### 5. Multi-Reference Subject-Driven Personalization with Layout
+```bash
+python inference.py \
+    --model_path /path/to/HiDream-O1-Image \
+    --shift 1 \
+    --seed 42 \
+    --prompt "City council members pose with relaxed smiles on a sunlit terrace, warm approachable mood, golden hour, cinematic soft glow." \
+    --ref_images assets/IP_layout/0.jpg assets/IP_layout/1.jpg \
+    --layout_bboxes "[[0.20507812, 0.43945312, 0.48828125, 0.7421875 ], [0.57617188, 0.80078125, 0.08789062, 0.34179688]]" \
+    --output_image results/ip_layout.png
 ```
 
 ### 4. Running with the Dev Model

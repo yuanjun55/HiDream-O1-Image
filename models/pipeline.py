@@ -4,11 +4,12 @@ import numpy as np
 import tqdm
 from PIL import Image
 import torchvision.transforms.v2 as transforms
-# FlowUniPCMultistepScheduler generates more details than FlowMatchEulerDiscreteScheduler
-from models.fm_solvers_unipc import FlowUniPCMultistepScheduler  # noqa: E402
 from diffusers import FlowMatchEulerDiscreteScheduler
-from models.flash_scheduler import FlashFlowMatchEulerDiscreteScheduler
-from models.utils import resize_pilimage, calculate_dimensions, get_rope_index_fix_point, find_closest_resolution
+# FlowUniPCMultistepScheduler generates more details than FlowMatchEulerDiscreteScheduler
+from .fm_solvers_unipc import FlowUniPCMultistepScheduler  # noqa: E402
+from .flash_scheduler import FlashFlowMatchEulerDiscreteScheduler
+from .utils import resize_pilimage, calculate_dimensions, get_rope_index_fix_point, find_closest_resolution
+from .utils import create_layout_reference_images, load_layout_bboxes
 
 TIMESTEP_TOKEN_NUM = 1
 NOISE_SCALE = 8.0
@@ -102,7 +103,6 @@ def clamp_tensor(tensor, percentage = 0.1):
     src_dtype = tensor.dtype
     return torch.clamp(tensor.float(), min=lower_bound, max=upper_bound).to(src_dtype)
 
-
 @torch.no_grad()
 def generate_image(
         model,
@@ -121,6 +121,7 @@ def generate_image(
         noise_scale_end: float = NOISE_SCALE,
         noise_clip_std: float = 0.0,
         keep_original_aspect: bool = False,
+        layout_bboxes: str = None,
         callback=None,
 ) -> Image.Image:
     device = model.device
@@ -184,13 +185,31 @@ def generate_image(
             ref_pils = [preresized_ref_pil]
         else:
             ref_pils = [Image.open(p).convert("RGB") for p in ref_image_paths]
+
         K = len(ref_pils)
+        layout_data = None
+        if layout_bboxes is not None and len(layout_bboxes) > 0 and preresized_ref_pil is None:
+            try:
+                layout_data = load_layout_bboxes(layout_bboxes)
+                K += 1
+            except Exception as e:
+                print(f"Incorrect layout_bboxes: {layout_bboxes}, {e}")
 
         if K == 1: max_size = max(height, width)
         elif K == 2: max_size = max(height, width) * 48 // 64
         elif K <= 4: max_size = max(height, width) // 2
         elif K <= 8: max_size = max(height, width) * 24 // 64
         else: max_size = max(height, width) // 4
+
+        if layout_data is not None:
+            ref_pils = create_layout_reference_images(
+                ref_pils = ref_pils,
+                layout_bboxes = layout_data,
+                image_width = width,
+                image_height = height,
+                ref_max_size = max_size,
+                patch_size = PATCH_SIZE,
+            )
 
         ref_pils_resized, ref_images = [], []
         for pil in ref_pils:
@@ -311,7 +330,7 @@ def generate_image(
     torch.manual_seed(seed + 1)
     if torch.cuda.is_available(): torch.cuda.manual_seed_all(seed + 1)
 
-    def forward_once(sample, z_in, t_pixeldit):
+    def forward_once(sample, z_in, t_pixeldit, precomputed_image_embeds=None, precomputed_deepstack_image_embeds=None):
         with torch.autocast(device.type, dtype=dtype, cache_enabled=False):
             kwargs = {
                 "input_ids": sample['input_ids'],
@@ -320,6 +339,8 @@ def generate_image(
                 "timestep": t_pixeldit.reshape(-1).to(device),
                 "token_types": sample['token_types'],
                 "use_flash_attn": True,
+                "precomputed_image_embeds": precomputed_image_embeds,
+                "precomputed_deepstack_image_embeds": precomputed_deepstack_image_embeds
             }
             if "pixel_values" in sample: kwargs["pixel_values"] = sample["pixel_values"]
             if "image_grid_thw" in sample: kwargs["image_grid_thw"] = sample["image_grid_thw"]
@@ -327,11 +348,13 @@ def generate_image(
             outputs = model(**kwargs)
             
         x_pred = outputs.x_pred
+        emb = getattr(outputs, "cond_image_embeds", None)
+        ds_emb = getattr(outputs, "cond_deepstack_image_embeds", None)
         # x_pred = clamp_tensor(x_pred, percentage = 0.01)
         if ref_patches is None:
             return x_pred[0, sample['vinput_mask'][0]].unsqueeze(0)
         else:
-            return x_pred[0, sample['vinput_mask'][0]][:tgt_image_len].unsqueeze(0)
+            return x_pred[0, sample['vinput_mask'][0]][:tgt_image_len].unsqueeze(0), emb, ds_emb
 
     def _decode_x0_preview(x0_pred):
         """Convert a model-predicted x_0 (patch layout, [-1,1]) to a PIL image."""
@@ -342,6 +365,9 @@ def generate_image(
         )
         arr_p = np.round(np.clip(img_t[0].numpy().transpose(1, 2, 0) * 255, 0, 255)).astype(np.uint8)
         return Image.fromarray(arr_p).convert("RGB")
+
+    cond_image_embeds = None
+    cond_deepstack_image_embeds = None
 
     for step_idx, step_t in enumerate(tqdm.tqdm(sched.timesteps, desc="Generating")):
         t_pixeldit = 1.0 - step_t.float() / 1000.0
@@ -360,7 +386,20 @@ def generate_image(
             preview_x0 = x_pred_cond
         else:
             vinputs = torch.cat([z, ref_patches], dim=1)
-            x_vis_list = [forward_once(sample, vinputs, t_pixeldit) for sample in samples]
+            x_vis_list = []
+            for sample in samples:
+                xp, emb, ds_emb = forward_once(
+                    sample, 
+                    vinputs, 
+                    t_pixeldit, 
+                    precomputed_image_embeds=cond_image_embeds,
+                    precomputed_deepstack_image_embeds=cond_deepstack_image_embeds
+                )
+                if emb is not None and ds_emb is not None:
+                    cond_image_embeds = emb.detach()
+                    cond_deepstack_image_embeds = [d.detach() for d in ds_emb]
+                x_vis_list.append(xp)
+            #x_vis_list = [forward_once(sample, vinputs, t_pixeldit) for sample in samples]
             x_vis_stacked = torch.cat(x_vis_list, dim=0)
             
             z_rep = z.expand(len(samples), -1, -1)

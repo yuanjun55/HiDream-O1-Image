@@ -24,11 +24,23 @@ def main():
     p.add_argument("--model_path", type=str, default = "/root/converted_models/HiDream-O1-Image", help="Path to huggingface model")
     p.add_argument("--prompt", type=str, default = "medium shot, eye-level, front view. A woman is seated in an ornate bedroom, illuminated by candlelight, with a calm and composed expression. The subject is a young woman with fair skin, light brown hair styled in an updo with loose tendrils framing her face, and blue eyes. She wears a cream-colored satin robe with delicate floral embroidery and lace trim along the neckline. Her ears are adorned with pearl drop earrings. She is seated on a bed with a dark, intricately carved wooden headboard. To her left, a wooden nightstand holds three lit white candles and a candelabra with multiple lit candles in the background. The bed is covered with patterned pillows and a dark, textured blanket. The walls are paneled with dark wood and feature a large, ornate tapestry with muted earth tones. The lighting creates soft highlights on her face and robe, with warm shadows cast across the room.")
     p.add_argument("--ref_images", nargs="*", default=[], help="Path to reference images.")
+    p.add_argument(
+        "--layout_bboxes",
+        type=str,
+        default=None,
+        help=(
+            "Layout boxes as a JSON string or JSON file path. "
+            "Input order is xxyy relative coordinates: [[x1,x2,y1,y2], ...], "
+            "[{\"bbox\": [x1,x2,y1,y2], \"text\": \"...\"}, ...], "
+            "or {\"bboxes\": ...}. Example: [0.1,0.15,0.2,0.36]."
+        ),
+    )
     p.add_argument("--output_image", type=str, default="output.png")
     p.add_argument("--height", type=int, default=2048)
     p.add_argument("--width", type=int, default=2048)
     p.add_argument("--model_type", type=str, default="full", choices=["full", "dev"])
     p.add_argument("--seed", type=int, default=32)
+    p.add_argument("--shift", type=float, default=3.0)
     p.add_argument("--guidance_scale", type=float, default=5.0)
     p.add_argument("--noise_scale_start", type=float, default=7.5)
     p.add_argument("--noise_scale_end", type=float, default=7.5)
@@ -67,7 +79,7 @@ def main():
     if args.model_type == "full":
         num_inference_steps = 50
         guidance_scale = args.guidance_scale
-        shift = 3.0
+        shift = args.shift
         timesteps_list = None
         scheduler_name = "default"
     else:
@@ -102,6 +114,7 @@ def main():
         scheduler_name=scheduler_name,
         seed=args.seed,
         keep_original_aspect=args.keep_original_aspect,
+        layout_bboxes = args.layout_bboxes,
         **extra_kwargs,
     )
     image.save(args.output_image)
