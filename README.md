@@ -269,6 +269,8 @@ python inference.py \
     --model_type dev
 ```
 
+For **editing** tasks (exactly one reference image), the Dev model defaults to the `flow_match` scheduler. `flow_match` is recommended for editing tasks. Pass `--editing_scheduler flash` to use the flash scheduler instead. This flag has no effect on the `full` model or on non-editing tasks.
+
 ### Command Line Arguments
 
 - `--model_path`: Path to the complete HuggingFace model directory (undistilled or distilled).
@@ -278,11 +280,12 @@ python inference.py \
 - `--height` / `--width`: Output image dimensions (default: `2048` × `2048`; values snap to valid resolutions internally).
 - `--model_type`: `full` or `dev` (default: `full`). Selects the inference recipe:
   - `full`: 50 steps, guidance scale `5.0`, shift `3.0`, default scheduler.
-  - `dev`: 28 steps, guidance scale `0.0`, shift `1.0`, flash scheduler with predefined timesteps.
+  - `dev`: 28 steps, guidance scale `0.0`, shift `1.0`, flash scheduler with predefined timesteps. For editing tasks (exactly one reference image), the default scheduler is `flow_match` instead — see `--editing_scheduler`.
 - `--seed`: Random seed (default: `32`).
 - `--guidance_scale`: Guidance scale (default: `5.0`). Only effective when `--model_type` is `full`.
 - `--noise_scale_start`, `--noise_scale_end`: Control the scale of the noise injected by the scheduler at each denoising step; the per-step scale linearly interpolates from `noise_scale_start` (first step) to `noise_scale_end` (last step). See `models/pipeline.py:262` and `models/pipeline.py:273`. Defaults: `7.5`, `7.5`.
 - `--noise_clip_std`: Per-step clipping threshold (in units of the injected noise's standard deviation) applied to the noise added during scheduler stepping. See `models/flash_scheduler.py:348-350`. Default: `2.5`.
+- `--editing_scheduler`: Scheduler to use for editing tasks (exactly one reference image) when `--model_type dev`. Choices: `flow_match` (default) or `flash`. Ignored for the `full` model and for non-editing tasks.
 - `--keep_original_aspect`: When exactly one reference image is provided, resize it with `max_size=2048` and use its dimensions for the target image (preserves the reference's aspect ratio) if `True`. 
 
 ## Web Demo
@@ -314,6 +317,10 @@ All four arguments can also be set via environment variables (see `.env.example`
 ### Prompt Agent in the UI
 
 The sidebar contains a Prompt Agent panel that calls the same Reasoning-Driven Prompt Agent used by `prompt_agent.py`.  Select either the *OpenAI-compatible API* backend (any endpoint, key, and model name) or the *Local · Gemma* backend (set `HIDREAM_AGENT_MODEL` in `.env` or the environment to point to your local Gemma-4-31B-it weights).
+
+### Editing Scheduler (Dev model only)
+
+When the server is launched with `--model_type dev`, the **Edit** tab exposes a *Scheduler* dropdown with two options: `flow_match` (default) and `flash`. The selector is hidden for the `full` model and for the Text → Image / Subject tabs, where the scheduler is fixed.
 
 ## License
 The code in this repository and the HiDream-O1-Image models are licensed under [MIT License](./LICENSE).

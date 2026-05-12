@@ -6,7 +6,7 @@ from PIL import Image
 import torchvision.transforms.v2 as transforms
 # FlowUniPCMultistepScheduler generates more details than FlowMatchEulerDiscreteScheduler
 from models.fm_solvers_unipc import FlowUniPCMultistepScheduler  # noqa: E402
-
+from diffusers import FlowMatchEulerDiscreteScheduler
 from models.flash_scheduler import FlashFlowMatchEulerDiscreteScheduler
 from models.utils import resize_pilimage, calculate_dimensions, get_rope_index_fix_point, find_closest_resolution
 
@@ -80,6 +80,9 @@ def build_scheduler(num_inference_steps, timesteps_list, shift, device, schedule
     if scheduler_name == "flash":
         sched = FlashFlowMatchEulerDiscreteScheduler(
             num_train_timesteps=1000, shift=shift, use_dynamic_shifting=False)
+    elif scheduler_name == "flow_match":
+        sched = FlowMatchEulerDiscreteScheduler(
+            num_train_timesteps=1000, shift=shift)
     elif scheduler_name == "default":
         sched = FlowUniPCMultistepScheduler(use_dynamic_shifting=False, shift=shift)
     else:

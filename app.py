@@ -455,6 +455,13 @@ INDEX_HTML = r"""<!doctype html>
           <input id="keep-aspect" type="checkbox" style="vertical-align:middle; margin-right:6px;" />
           Keep reference aspect (resize to 2048)
         </label>
+        <div id="edit-scheduler-row" style="display:none; margin-top:12px;">
+          <label>Scheduler</label>
+          <select id="edit-scheduler">
+            <option value="flow_match" selected>flow_match (default)</option>
+            <option value="flash">flash</option>
+          </select>
+        </div>
       </div>
 
       <details id="refine-section">
@@ -527,6 +534,7 @@ INDEX_HTML = r"""<!doctype html>
 
 <script>
 const $ = (id) => document.getElementById(id);
+const MODEL_TYPE = "{{ model_type }}";
 let mode = "t2i";
 let refFiles = [];
 let lastRefined = null;
@@ -541,12 +549,14 @@ document.querySelectorAll(".tab").forEach((t) => {
     const refsGroup = $("refs-group");
     const refineSection = $("refine-section");
     const keepAspectRow = $("keep-aspect-row");
+    const editSchedRow = $("edit-scheduler-row");
     if (mode === "t2i") {
       refsGroup.style.display = "none";
       refFiles = []; renderThumbs();
       refineSection.style.display = "";
       keepAspectRow.style.display = "none";
       $("keep-aspect").checked = false;
+      editSchedRow.style.display = "none";
     } else {
       refsGroup.style.display = "";
       $("refs-label").textContent = mode === "edit"
@@ -560,6 +570,8 @@ document.querySelectorAll(".tab").forEach((t) => {
       // `keep_original_aspect` only applies when there is exactly one ref image.
       keepAspectRow.style.display = mode === "edit" ? "" : "none";
       if (mode !== "edit") $("keep-aspect").checked = false;
+      // Editing scheduler selector only applies to the Dev model + Edit tab.
+      editSchedRow.style.display = (mode === "edit" && MODEL_TYPE === "dev") ? "" : "none";
     }
   };
 });
@@ -688,6 +700,8 @@ $("go").onclick = async () => {
   try {
     const refs_b64 = await Promise.all(refFiles.map(fileToB64));
     const keepAspect = mode === "edit" && $("keep-aspect").checked && refFiles.length === 1;
+    const editingScheduler = (mode === "edit" && MODEL_TYPE === "dev")
+      ? $("edit-scheduler").value : null;
     const startResp = await fetch("/api/generate/start", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -698,6 +712,7 @@ $("go").onclick = async () => {
         seed: parseInt($("seed").value),
         refs_b64,
         keep_original_aspect: keepAspect,
+        editing_scheduler: editingScheduler,
       }),
     });
     const startData = await startResp.json();
@@ -814,6 +829,9 @@ def api_generate_start():
     seed = int(data.get("seed", 32))
     refs_b64 = data.get("refs_b64") or []
     keep_original_aspect = bool(data.get("keep_original_aspect", False))
+    editing_scheduler = data.get("editing_scheduler") or "flow_match"
+    if editing_scheduler not in ("flow_match", "flash"):
+        return jsonify({"error": f"Unknown editing_scheduler: {editing_scheduler}"}), 400
 
     if mode == "edit" and len(refs_b64) != 1:
         return jsonify({"error": "Edit mode requires exactly one reference image"}), 400
@@ -869,6 +887,14 @@ def api_generate_start():
                         shift=3.0,
                         timesteps_list=None,
                         scheduler_name="default",
+                    )
+                elif mode == "edit" and editing_scheduler == "flow_match":
+                    kwargs = dict(
+                        num_inference_steps=28,
+                        guidance_scale=0.0,
+                        shift=1.0,
+                        timesteps_list=DEFAULT_TIMESTEPS,
+                        scheduler_name="flow_match",
                     )
                 else:
                     kwargs = dict(

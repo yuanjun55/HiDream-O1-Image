@@ -34,6 +34,15 @@ def main():
     p.add_argument("--noise_scale_end", type=float, default=7.5)
     p.add_argument("--noise_clip_std", type=float, default=2.5)
     p.add_argument(
+        "--editing_scheduler",
+        type=str,
+        default="flow_match",
+        choices=["flow_match", "flash"],
+        help="Scheduler used for editing (exactly one reference image) when "
+             "--model_type dev. Default: flow_match. Ignored for full model "
+             "and for non-editing tasks.",
+    )
+    p.add_argument(
         "--keep_original_aspect",
         action="store_true",
         help="When exactly one reference image is provided, resize it with "
@@ -62,14 +71,22 @@ def main():
         timesteps_list = None
         scheduler_name = "default"
     else:
-        num_inference_steps = 28
-        guidance_scale = 0.0
-        shift = 1.0
-        timesteps_list = DEFAULT_TIMESTEPS
-        scheduler_name = "flash"
-        extra_kwargs["noise_scale_start"] = args.noise_scale_start
-        extra_kwargs["noise_scale_end"] = args.noise_scale_end
-        extra_kwargs["noise_clip_std"] = args.noise_clip_std
+        is_editing = len(args.ref_images) == 1
+        if is_editing and args.editing_scheduler == "flow_match":
+            num_inference_steps = 28
+            guidance_scale = 0.0
+            shift = 1.0
+            timesteps_list = DEFAULT_TIMESTEPS
+            scheduler_name = "flow_match"
+        else:
+            num_inference_steps = 28
+            guidance_scale = 0.0
+            shift = 1.0
+            timesteps_list = DEFAULT_TIMESTEPS
+            scheduler_name = "flash"
+            extra_kwargs["noise_scale_start"] = args.noise_scale_start
+            extra_kwargs["noise_scale_end"] = args.noise_scale_end
+            extra_kwargs["noise_clip_std"] = args.noise_clip_std
 
     image = generate_image(
         model=model,
