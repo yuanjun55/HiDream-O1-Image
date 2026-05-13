@@ -286,7 +286,7 @@ python inference.py \
     --output_image results/ip_layout.png
 ```
 
-### 4. Running with the Dev Model
+### 6. Running with the Dev Model
 All three tasks above can be run with the **Dev** model by switching `--model_path` to the Dev checkpoint and setting `--model_type dev`. For example:
 
 ```bash
