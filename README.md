@@ -29,7 +29,7 @@ HiDream-O1-Image is a natively unified image generative foundation model built o
 </p>
 
 <p align="center">
-  <img src="assets/IP_2.webp" alt="Subject-driven personalization" width="100%"/>
+  <img src="assets/IP_2.jpg" alt="Subject-driven personalization" width="100%"/>
   <br><sub><b>Subject-driven personalization</b> — preserve identity / IP across new scenes.</sub>
 </p>
 
