@@ -6,7 +6,7 @@ HiDream-O1-Image is a natively unified image generative foundation model built o
 - 🚀 **May 14, 2026:** We open-sourced [**HiDream-O1-Image-Dev-2604**](https://huggingface.co/HiDream-ai/HiDream-O1-Image-Dev-2604) with its [prompt refiner](https://huggingface.co/HiDream-ai/Prompt-Refine), tailored for text-to-image generation task.
 - 🛠️ **May 13, 2026:** Inference & pipeline updates — accelerated IP inference; the IP pipeline now supports **layout** and **skeleton** conditioning; updated the Dev editing scheduler. For editing tasks we recommend using the **full** model. PyTorch 2.9.x is not recommended due to the [issue](https://github.com/QwenLM/Qwen3-VL/issues/1811).
 - 🤗 **May 10, 2026:** Try **HiDream-O1-Image** online on Hugging Face Spaces — [🤗 HiDream-O1-Image](https://huggingface.co/spaces/HiDream-ai/HiDream-O1-Image) and [🤗 HiDream-O1-Image-Dev](https://huggingface.co/spaces/HiDream-ai/HiDream-O1-Image-Dev).
-- 📕 **May 10, 2026:** Our **technical report** is now available — [📑 HiDream-O1-Image.pdf](assets/HiDream-O1-Image.pdf).
+- 📕 **May 10, 2026:** Our **technical report** is now available — [📑 HiDream-O1-Image.pdf](https://arxiv.org/pdf/2605.11061v1).
 - 🚀 **May 8, 2026:** We've open-sourced **HiDream-O1-Image (8B)**, including both the undistilled and distilled Dev variants, together with the Reasoning-Driven Prompt Agent.
 
 <div align="center">
@@ -364,3 +364,14 @@ When the server is launched with `--model_type dev`, the **Edit** tab exposes a 
 
 ## License
 The code in this repository and the HiDream-O1-Image models are licensed under [MIT License](./LICENSE).
+
+## Citation
+
+```bibtex
+@article{hidreamolimage,
+  title={HiDream-O1-Image: A Natively Unified Image Generative Foundation Model with Pixel-level Unified Transformer},
+  author={Cai, Qi and Chen, Jingwen and Gao, Chengmin and Gong, Zijian and Li, Yehao and Mei, Tao and Pan, Yingwei and Peng, Yi and Qiu, Zhaofan and Yao, Ting and Yu, Kai and Zhang, Yiheng and others},
+  journal={arXiv preprint arXiv:2605.11061},
+  year={2026}
+}
+```
