@@ -3,6 +3,7 @@
 HiDream-O1-Image is a natively unified image generative foundation model built on a Pixel-level Unified Transformer (UiT) without external VAEs or disjoint text encoders, which natively encodes raw pixels, text, and task-specific conditions in a single shared token space — supporting text-to-image, image editing, and subject-driven personalization at up to 2,048 × 2,048.
 
 ## Project Updates
+- 🚀 **May 14, 2026:** We open-sourced [**HiDream-O1-Image-Dev-2604**](https://huggingface.co/HiDream-ai/HiDream-O1-Image-Dev-2604) and its dedicated [**Prompt Agent 2604**](https://huggingface.co/HiDream-ai/Prompt-Refine) prompt refiner, tailored for text-to-image generation tasks.
 - 🛠️ **May 13, 2026:** Inference & pipeline updates — accelerated IP inference; the IP pipeline now supports **layout** and **skeleton** conditioning; updated the Dev editing scheduler. For editing tasks we recommend using the **full** model. PyTorch 2.9.x is not recommended due to the [issue](https://github.com/QwenLM/Qwen3-VL/issues/1811).
 - 🤗 **May 10, 2026:** Try **HiDream-O1-Image** online on Hugging Face Spaces — [🤗 HiDream-O1-Image](https://huggingface.co/spaces/HiDream-ai/HiDream-O1-Image) and [🤗 HiDream-O1-Image-Dev](https://huggingface.co/spaces/HiDream-ai/HiDream-O1-Image-Dev).
 - 📕 **May 10, 2026:** Our **technical report** is now available — [📑 HiDream-O1-Image.pdf](assets/HiDream-O1-Image.pdf).
@@ -50,11 +51,9 @@ HiDream-O1-Image is a natively unified image generative foundation model built o
 | HiDream-O1-Image | [`inference.py`](./inference.py) | 50 | [🤗 HiDream-O1-Image](https://huggingface.co/HiDream-ai/HiDream-O1-Image) |
 | HiDream-O1-Image-Dev | [`inference.py`](./inference.py) | 28 | [🤗 HiDream-O1-Image-Dev](https://huggingface.co/HiDream-ai/HiDream-O1-Image-Dev) |
 | Prompt Agent | [`prompt_agent.py`](./prompt_agent.py) | — | [🤗 google/gemma-4-31B-it](https://huggingface.co/google/gemma-4-31B-it) |
+| Web Demo | [`app.py`](./app.py) | — | — |
 | HiDream-O1-Image-Dev-2604 | [`inference.py` (dev branch)](https://github.com/HiDream-ai/HiDream-O1-Image/blob/dev/inference.py) | 28 | [🤗 HiDream-O1-Image-Dev-2604](https://huggingface.co/HiDream-ai/HiDream-O1-Image-Dev-2604) |
 | Prompt Agent 2604 | [`prompt_agent_v2.py` (dev branch)](https://github.com/HiDream-ai/HiDream-O1-Image/blob/dev/prompt_agent_v2.py) | — | [🤗 HiDream-ai/Prompt-Refine](https://huggingface.co/HiDream-ai/Prompt-Refine) |
-| Web Demo | [`app.py`](./app.py) | — | — |
-
-> **Note:** `HiDream-O1-Image-Dev-2604` is a **text-to-image specific** model, and `Prompt Agent 2604` is its dedicated prompt refiner. To use it, please switch to the [`dev` branch](https://github.com/HiDream-ai/HiDream-O1-Image/tree/dev) of this repository.
 
 ## Evaluation
 
