@@ -46,14 +46,14 @@ HiDream-O1-Image is a natively unified image generative foundation model built o
 
 ## Models
 
-| Name | Script | Inference Steps | HuggingFace Repo |
+| Name | Script | Inference Steps | HuggingFace & ModelScope Repo |
 | :--- | :--- | :---: | :--- |
-| HiDream-O1-Image | [`inference.py`](./inference.py) | 50 | [🤗 HiDream-O1-Image](https://huggingface.co/HiDream-ai/HiDream-O1-Image) |
-| HiDream-O1-Image-Dev | [`inference.py`](./inference.py) | 28 | [🤗 HiDream-O1-Image-Dev](https://huggingface.co/HiDream-ai/HiDream-O1-Image-Dev) |
+| HiDream-O1-Image | [`inference.py`](./inference.py) | 50 | [🤗 HiDream-O1-Image](https://huggingface.co/HiDream-ai/HiDream-O1-Image) [🤖 HiDream-O1-Image](https://modelscope.cn/models/HiDream-ai/HiDream-O1-Image) |
+| HiDream-O1-Image-Dev | [`inference.py`](./inference.py) | 28 | [🤗 HiDream-O1-Image-Dev](https://huggingface.co/HiDream-ai/HiDream-O1-Image-Dev) [🤖 HiDream-O1-Image-Dev](https://modelscope.cn/models/HiDream-ai/HiDream-O1-Image-Dev)|
 | Prompt Agent | [`prompt_agent.py`](./prompt_agent.py) | — | [🤗 google/gemma-4-31B-it](https://huggingface.co/google/gemma-4-31B-it) |
 | Web Demo | [`app.py`](./app.py) | — | — |
-| HiDream-O1-Image-Dev-2604 | [`inference.py` (dev branch)](https://github.com/HiDream-ai/HiDream-O1-Image/blob/dev/inference.py) | 28 | [🤗 HiDream-O1-Image-Dev-2604](https://huggingface.co/HiDream-ai/HiDream-O1-Image-Dev-2604) |
-| Prompt Agent 2604 | [`prompt_agent_v2.py` (dev branch)](https://github.com/HiDream-ai/HiDream-O1-Image/blob/dev/prompt_agent_v2.py) | — | [🤗 HiDream-ai/Prompt-Refine](https://huggingface.co/HiDream-ai/Prompt-Refine) |
+| HiDream-O1-Image-Dev-2604 | [`inference.py` (dev branch)](https://github.com/HiDream-ai/HiDream-O1-Image/blob/dev/inference.py) | 28 | [🤗 HiDream-O1-Image-Dev-2604](https://huggingface.co/HiDream-ai/HiDream-O1-Image-Dev-2604) [🤖 HiDream-O1-Image-Dev-2604](https://modelscope.cn/models/HiDream-ai/HiDream-O1-Image-Dev-2604)|
+| Prompt Agent 2604 | [`prompt_agent_v2.py` (dev branch)](https://github.com/HiDream-ai/HiDream-O1-Image/blob/dev/prompt_agent_v2.py) | — | [🤗 HiDream-ai/Prompt-Refine](https://huggingface.co/HiDream-ai/Prompt-Refine) [🤖 Prompt-Refine](https://modelscope.cn/models/HiDream-ai/Prompt-Refine)|
 
 ## Evaluation
 
